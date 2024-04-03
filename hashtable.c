@@ -2,12 +2,6 @@
 #include <stdio.h>
 #include "hashtable.h"
 
-void free_pair(Pair *p)
-{
-    free(p->key);
-    free(p->value);
-}
-
 HashTable *create_hashtable(int (*hash)(void *),
                             int (*equals)(void *, void *, int),
                             size_t initial_capacity)
@@ -37,9 +31,17 @@ HashTable *create_hashtable(int (*hash)(void *),
 
 void free_hashtable(HashTable *table)
 {
-    for (int i = 0; i < table->length; i++)
+    for (int i = 0; i < table->capacity; i++)
     {
-        free_pair(&table->values[i]);
+        if (table->values[i].key != NULL)
+        {
+            free(table->values[i].key);
+        }
+
+        if (table->values[i].value != NULL)
+        {
+            free(table->values[i].value);
+        }
     }
 
     free(table->values);
