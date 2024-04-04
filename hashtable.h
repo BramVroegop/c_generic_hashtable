@@ -12,7 +12,7 @@ typedef struct
     size_t capacity;
     size_t length;
     int (*hash)(void *);
-    int (*equals)(void *, void *, int)
+    int (*equals)(void *, void *, int);
 } HashTable;
 
 HashTable *create_hashtable(int (*hash)(void *),

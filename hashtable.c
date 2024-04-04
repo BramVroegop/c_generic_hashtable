@@ -86,7 +86,7 @@ void hashtable_add(HashTable *table, void *key, void *value)
     table->values[hash + offset] = pair;
 }
 
-void *hashtable_get(HashTable *table, void *key, int key_size)
+Pair *hashtable_get_pair(HashTable *table, void *key, int key_size)
 {
     int hash = table->hash(key) % table->capacity;
 
@@ -97,46 +97,37 @@ void *hashtable_get(HashTable *table, void *key, int key_size)
         offset++;
     }
 
-    if (hash + offset == table->capacity && !table->equals(table->values[hash + offset].key, key, key_size))
+    if (hash + offset >= table->capacity && !table->equals(table->values[hash + offset].key, key, key_size))
     {
         return NULL;
     }
 
-    void *res = table->values[hash + offset].value;
+    return &table->values[hash + offset];
+}
 
-    if (res == NULL)
+void *hashtable_get(HashTable *table, void *key, int key_size)
+{
+    Pair *p = hashtable_get_pair(table, key, key_size);
+    if (p == NULL)
     {
         return NULL;
     }
 
-    return res;
+    return p->value;
 }
 
 void *hashtable_pop(HashTable *table, void *key, int key_size)
 {
-    int hash = table->hash(key) % table->capacity;
-
-    int offset = 0;
-    while (hash + offset < table->capacity &&
-           !table->equals(table->values[hash + offset].key, key, key_size))
-    {
-        offset++;
-    }
-
-    if (hash + offset == table->capacity && !table->equals(table->values[hash + offset].key, key, key_size))
+    Pair *p = hashtable_get_pair(table, key, key_size);
+    if (p == NULL)
     {
         return NULL;
     }
 
-    void *res = table->values[hash + offset].value;
+    void *res = p->value;
 
-    if (res == NULL)
-    {
-        return NULL;
-    }
-
-    table->values[hash + offset].value = NULL;
-    table->values[hash + offset].key = NULL;
+    p->value = NULL;
+    p->key = NULL;
 
     table->length--;
 
